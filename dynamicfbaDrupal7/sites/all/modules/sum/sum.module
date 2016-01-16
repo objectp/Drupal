@@ -1,0 +1,78 @@
+<?php 
+//when sum url accessed run a function drupal_get_form passing sum_form function as an argumet
+function sum_menu(){
+	$items = array();
+	$items['sum'] = array(
+			'title' => "Calculate Sum",
+			'type' => MENU_NORMAL_ITEM,//display in the menu item
+			'access callback' => TRUE,//means: anyone can access the form
+			'page callback' => 'drupal_get_form', //drupal existing function 
+			'page arguments' => array('sum_form'),//sets array of arguments to pass to the page
+		);
+	$items['success'] = array(
+			'title' => "Success",
+			'type' => MENU_CALLBACK, //hide the page from the menu
+			'access callback' => TRUE,
+			'page callback' => 'sum_success',
+
+		);
+	return $items;
+}
+
+
+//needs to return array of information 
+function sum_form(){
+
+	$form = array();
+	$form['left_number'] = array(
+			'#title' => 'Left Number',
+			'#type' => 'textfield',
+			'#size' => 10,
+			'#maxlength' => 10,
+			'#required' => TRUE,
+			'#description' => t('Please enter your starting number.'),
+		);
+	$form['right_number'] = array(
+			'#title' => 'Right Number',
+			'#type' => 'textfield',
+			'#description' => t('Please enter a number to add to the starting number.'),
+		);
+	/*$form['mytext'] = array(
+			'#titel' => t('My Textarea'),
+			'#type' => 'textarea',
+			'#default_value' => 'xyz',
+		);*/
+	$form['submit'] = array(
+			'#type' => 'submit',
+			'#value' => 'Calculate Sum',
+		);
+
+	return $form;
+}
+
+//validation handler 
+function sum_form_validate($form, &$form_state){
+	//print('<pre>'.print_r($form_state['values'], 1).'</pre');die();
+	if(!is_numeric($form_state['values']['left_number'])){
+		form_set_error('left_number', t('You must enter a valied number'));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+function sum_form_submit($form, &$form_state){//$form is the same variable above &$form_state is larger array created after form submition
+	$frist_number = $form_state['values']['left_number'];
+	$second_number = $form_state['values']['right_number'];
+
+	$sum = $frist_number + $second_number;
+	$_SESSION['sum_output'] = $sum;
+	//u don't use & once ur inside the fucntion 
+	$form_state['redirect'] = "success";
+
+}
+
+function sum_success(){
+	$answer = $_SESSION['sum_output'];
+	return "You calculated a sum! The answer is $answer";
+}
+
